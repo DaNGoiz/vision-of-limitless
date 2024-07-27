@@ -4,14 +4,12 @@ using UnityEngine;
 using UnderCloud;
 using System;
 using UnityEngine.SceneManagement;
-<<<<<<< Updated upstream
-=======
 using UnityEngine.Rendering;
-using OvO;
->>>>>>> Stashed changes
+using Unity.VisualScripting;
 
-public class PlayControl : MonoBehaviour
+public class Player2: MonoBehaviour
 {
+    public static Player2 Instance;
     [Header("控制相关")]
     public Transform player;
     private Vector3 velocity = Vector3.zero;
@@ -42,6 +40,7 @@ public class PlayControl : MonoBehaviour
     public Vector3 backRightPosition;
     public float backSmoothTime;
     public float distance;
+    public SortingGroup sortingGroup;
     [Header("睁眼闭眼")]
     public PlayerState isOpenEye = PlayerState.Open;
     public float blinkTime = 0.5f;
@@ -53,9 +52,13 @@ public class PlayControl : MonoBehaviour
     [Header("动画相关")]
     private Animator anim;
     public bool crashWall;
+    [Header("音乐相关")]
+    public AudioSource walk;
+    public AudioSource hitWall;
 
     private void Awake()
     {
+        Instance = this;
         anim = GetComponent<Animator>();
     }
     private void FixedUpdate()
@@ -89,39 +92,32 @@ public class PlayControl : MonoBehaviour
         touchLeftWall = false;
         touchRightWall = false;
         touchDownWall = false;
+        isOpenEye = PlayerState.Open;
         anim.SetTrigger("Revive");
         velocity = Vector3.zero;
-        //检查摄像机是否只有一个
-        GameObject mCamera = GameObject.FindWithTag("MainCamera");
-        if (mCamera)
-        {
-            mCamera.SetActive(false);
-            transform.GetChild(0).gameObject.SetActive(true);
-        }
     }
 
     public static void SpawnPlayer(Vector3 position)
     {
-        GameObject pl = GameObject.FindWithTag(TagName.Player);
-        if (pl == null)
+        if (Instance == null)
         {
-            pl = Resources.Load<GameObject>("Prefabs/Player");
-        }
-        if (pl.TryGetComponent(out PlayControl player))
-        {
-            player.transform.position = position;
-            player.position = position;
-            player.Init();
+            return;
         }
         else
-            Debug.LogError("加载的玩家资源缺少必要组件");
+        {
+            Instance.gameObject.SetActive(true);
+            Instance.transform.position = position;
+            Instance.position = position;
+            Instance.Init();
+        }
     }
 
     private void CheckWin()
     {
         if (MapManager.GetTile(new Vector2Int((int)position.x, (int)position.y))?.type == TileType.Exit)
         {
-            Messenger.Broadcast(MsgType.playerWin);
+            gameObject.SetActive(false);
+            PlayerWinChecker.ReachExit(1, new Vector2Int((int)position.x, (int)position.y));
             transform.position = Vector3.zero;
             position = Vector3.zero;
         }
@@ -143,7 +139,11 @@ public class PlayControl : MonoBehaviour
             player.position = position;
             isWalk = false;
         }
-
+        // audio
+        if (isWalk)
+        {
+            walk.Play();
+        }
     }
 
     public void ControlCheck()
@@ -152,32 +152,24 @@ public class PlayControl : MonoBehaviour
         backDownPosition = new Vector3(position.x, position.y - 0.8f, position.z);
         backLeftPosition = new Vector3(position.x - 0.8f, position.y, position.z);
         backRightPosition = new Vector3(position.x + 0.8f, position.y, position.z);
-        if (Input.GetKeyDown(KeyCode.Space) && !isBlinking)
+        if (isHurt == false&&isWalk == false)
         {
-            isBlinking = true;
-            ChangeEyeState();
-            StartCoroutine(Blinking());
-        }
-        if (isHurt == false)
-        {
+            if (Input.GetKeyDown(KeyCode.Space) && !isBlinking)
+            {
+                isBlinking = true;
+                ChangeEyeState();
+                StartCoroutine(Blinking());
+            }
             if (Input.GetKeyDown(KeyCode.W))
             {
-<<<<<<< Updated upstream
-                if (isWalk == false && touchUpWall == false && crashWall == false)
+                sortingGroup.sortingLayerName = "Player";
+                if (walking == false && isWalk == false && touchUpWall == false && crashWall == false && (upBesidePlayer == false || upBesidePlayerTouchWall == false))
                 {
                     position.y += 1;
                     isWalk = true;
-
-=======
-                sortingGroup.sortingLayerName = "Player";
-                if (walking == false && isWalk == false && touchUpWall == false && crashWall == false && (upBesidePlayer == false|| upBesidePlayerTouchWall == false))
-                {          
-                        position.y += 1;
-                        isWalk = true;
->>>>>>> Stashed changes
                 }
                 if (touchUpWall == true || upBesidePlayer == true && upBesidePlayerTouchWall == true)
-                { 
+                {
                     if (MapManager.IsDamagable(new Vector2Int((int)position.x, (int)position.y + 1), isOpenEye))
                     {
                         PlayerDie();
@@ -196,13 +188,10 @@ public class PlayControl : MonoBehaviour
                 }
                 if (touchDownWall == true || downBesidePlayer == true && downBesidePlayerTouchWall == true)
                 {
-<<<<<<< Updated upstream
-=======
                     if (eyeOpening == true)
                     {
                         sortingGroup.sortingLayerName = "CrashLayer";
                     }
->>>>>>> Stashed changes
                     if (MapManager.IsDamagable(new Vector2Int((int)position.x, (int)position.y - 1), isOpenEye))
                     {
                         PlayerDie();
@@ -211,21 +200,15 @@ public class PlayControl : MonoBehaviour
                     walking = true;
                     transform.position = Vector3.SmoothDamp(transform.position, backDownPosition, ref velocity, backSmoothTime);
                 }
-
             }
-
-            if (Input.GetKeyDown(KeyCode.A) && crashWall == false)
+            if (Input.GetKeyDown(KeyCode.A))
             {
+                sortingGroup.sortingLayerName = "Player";
                 player.localScale = new Vector3(-1, 1, 1);
-<<<<<<< Updated upstream
-                if (isWalk == false && touchLeftWall == false)
-=======
                 if (walking == false && isWalk == false && touchLeftWall == false && crashWall == false && (leftBesidePlayer == false || leftBesidePlayerTouchWall == false))
->>>>>>> Stashed changes
                 {
                     position.x += -1;
                     isWalk = true;
-
                 }
                 if (touchLeftWall == true || leftBesidePlayer == true && leftBesidePlayerTouchWall == true)
                 {
@@ -239,15 +222,11 @@ public class PlayControl : MonoBehaviour
 
                 }
             }
-
-            if (Input.GetKeyDown(KeyCode.D) && crashWall == false)
+            if (Input.GetKeyDown(KeyCode.D))
             {
+                sortingGroup.sortingLayerName = "Player";
                 player.localScale = new Vector3(1, 1, 1);
-<<<<<<< Updated upstream
-                if (isWalk == false && touchRightWall == false)
-=======
                 if (walking == false && isWalk == false && touchRightWall == false && crashWall == false && (rightBesidePlayer == false || rightBesidePlayerTouchWall == false))
->>>>>>> Stashed changes
                 {
                     position.x += 1;
                     isWalk = true;
@@ -264,9 +243,9 @@ public class PlayControl : MonoBehaviour
                 }
 
             }
-
         }
     }
+
     public void TouchWallEffect()
     {
         touchWall = !MapManager.IsAccessible(new Vector2Int((int)position.x, (int)position.y), isOpenEye);
@@ -282,6 +261,10 @@ public class PlayControl : MonoBehaviour
         downBesidePlayerTouchWall = !MapManager.IsAccessible(new Vector2Int((int)position.x, (int)position.y - 2), isOpenEye);
         leftBesidePlayerTouchWall = !MapManager.IsAccessible(new Vector2Int((int)position.x - 2, (int)position.y), isOpenEye);
         rightBesidePlayerTouchWall = !MapManager.IsAccessible(new Vector2Int((int)position.x + 2, (int)position.y), isOpenEye);
+        //if(position.x > 0.5||position.y > 2.5)    //测试用的
+        //{                                         //测试用的        
+        //    touchWall = true;                     //测试用的            
+        //}                                         //测试用的      
     }
     private void ChangeEyeState()
     {
@@ -303,7 +286,7 @@ public class PlayControl : MonoBehaviour
         isHurt = true;
         yield return new WaitForSeconds(1.5f);
         Messenger.Broadcast(MsgType.playerHurt);
-        transform.position = new Vector3(200, 200, 0);
+        transform.position = new Vector3(200 ,200 , 0);
         position = transform.position;
         yield return null;
     }
@@ -320,6 +303,8 @@ public class PlayControl : MonoBehaviour
         float time = 0;
         if (crashWall == true)
         {
+            //audio
+            hitWall.Play();
             time++;
             if (time < timer && crashWall == true)
             {
@@ -355,7 +340,7 @@ public class PlayControl : MonoBehaviour
     public void WalkTimer()
     {
         if (walking == true)
-        { 
+        {
             time++;
             if (time >= timer)
             {
