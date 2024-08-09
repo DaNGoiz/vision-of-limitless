@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
-    public static string[] levelName = new string[11]
+    public static string[] levelName = new string[25]
     {
         "Level0",
         "Level1",
@@ -16,11 +16,25 @@ public class GameManager : Singleton<GameManager>
         "Level3",
         "Level4",
         "Level5",
+        "Level6",
+        "Level7",
+        "Level8",
         "Level9",
         "Level10",
-        "Level6",
-        "Level8",
-        "Level7",
+        "Level11",
+        "Level12",
+        "Level13",
+        "Level14",
+        "Level15",
+        "Level16",
+        "Level17",
+        "Level18",
+        "Level19",
+        "Level20",
+        "Level21",
+        "Level22",
+        "Level23",
+        "Level24",
     };
     public int currentLevelIndex;
 
@@ -37,6 +51,7 @@ public class GameManager : Singleton<GameManager>
         Messenger.AddListener(MsgType.playerWin, LoadNextLevel);
 
         Messenger.AddListener<PlayerState>(MsgType.changeOpenCloseEye, MapManager.SwitchTransformWallState);
+        Messenger.AddListener<PlayerState>(MsgType.changeOpenCloseEye, MapManager.CountTimeLimitedWall);
         Messenger.AddListener(MsgType.levelStart, MapManager.InitWhenLevelStart);
         currentLevelIndex = PlayerPrefs.GetInt("currentLevelIndex", 0);
     }
