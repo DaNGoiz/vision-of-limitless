@@ -38,6 +38,8 @@ public class BlinkAudioChange : MonoBehaviour
     void HurtAudio()
     {
         hurtAudio.Play();
+        openEyeAudio.volume = 1;
+        closeEyeAudio.volume = 0;
     }
 
     void WinAudio()
