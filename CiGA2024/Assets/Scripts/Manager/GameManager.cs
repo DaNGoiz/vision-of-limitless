@@ -140,7 +140,14 @@ public class GameManager : Singleton<GameManager>
         currentLevelIndex = PlayerPrefs.GetInt("currentLevelIndex", 0);
         SceneManager.UnloadSceneAsync(levelName[currentLevelIndex]);
         currentLevelIndex += 1;
+
         PlayerPrefs.SetInt("currentLevelIndex", currentLevelIndex);
+        int maxIndex = PlayerPrefs.GetInt("maxLevelIndex", 0);
+        if (maxIndex < currentLevelIndex)
+        {
+            PlayerPrefs.SetInt("maxLevelIndex", currentLevelIndex);
+        }
+
         if (!SceneManager.GetSceneByName("Player").isLoaded)
         {
             SceneManager.LoadScene("Player", LoadSceneMode.Additive);
