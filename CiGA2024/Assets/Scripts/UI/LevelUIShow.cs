@@ -17,15 +17,23 @@ public class LevelUIShow : MonoBehaviour
     void Start()
     {
         int level = PlayerPrefs.GetInt("maxLevelIndex");
-        for (int i = 0; i <= level; i++)
-        {
-            levelUI[i].SetActive(true);
-        }
+        
         if(level < levelUI.Length)
         {
+            for (int i = 0; i <= level; i++)
+            {
+                levelUI[i].SetActive(true);
+            }
             for (int i = level+1; i < levelUI.Length; i++)
             {
                 levelUI[i].SetActive(false);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < levelUI.Length; i++)
+            {
+                levelUI[i].SetActive(true);
             }
         }
     }
